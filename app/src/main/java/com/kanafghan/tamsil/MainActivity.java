@@ -5,24 +5,33 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.ListAdapter;
 import android.widget.Toast;
 
-import com.kanafghan.tamsil.adapters.ImageAdapter;
+import com.kanafghan.tamsil.adapters.PosterAdapter;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private ImageAdapter mImageAdapter;
+    private static final String KEY_MOVIES_LIST = "movies";
+    private PosterAdapter mPosterAdapter;
+    private ArrayList<String> mMovieList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        if (savedInstanceState != null && savedInstanceState.containsKey(KEY_MOVIES_LIST)) {
+            mMovieList = savedInstanceState.getStringArrayList(KEY_MOVIES_LIST);
+        } else {
+            mMovieList = new ArrayList<String>();
+        }
+
         GridView gridview = (GridView) findViewById(R.id.gridview);
 
-        mImageAdapter = new ImageAdapter(this);
-        gridview.setAdapter(mImageAdapter);
+        mPosterAdapter = new PosterAdapter(this, mMovieList);
+        gridview.setAdapter(mPosterAdapter);
 
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
@@ -41,11 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void fetchMovies() {
         for (int i = 0; i < mPosters.length; i++) {
-            mImageAdapter.addImage(BASE_URL + mPosters[i]);
+            mMovieList.add(mPosters[i]);
         }
     }
-
-    private static final String BASE_URL = "http://image.tmdb.org/t/p/w185";
 
     // references to our images
     private String[] mPosters = {
