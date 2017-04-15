@@ -1,6 +1,7 @@
 package com.kanafghan.tamsil;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
@@ -8,6 +9,9 @@ import android.widget.GridView;
 import android.widget.Toast;
 
 import com.kanafghan.tamsil.adapters.PosterAdapter;
+import com.kanafghan.tamsil.models.Movie;
+
+import org.parceler.Parcels;
 
 import java.util.ArrayList;
 
@@ -15,7 +19,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String KEY_MOVIES_LIST = "movies";
     private PosterAdapter mPosterAdapter;
-    private ArrayList<String> mMovieList;
+    private ArrayList<Movie> mMovieList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,9 +27,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         if (savedInstanceState != null && savedInstanceState.containsKey(KEY_MOVIES_LIST)) {
-            mMovieList = savedInstanceState.getStringArrayList(KEY_MOVIES_LIST);
+            mMovieList = Parcels.unwrap(savedInstanceState.getParcelable(KEY_MOVIES_LIST));
         } else {
-            mMovieList = new ArrayList<String>();
+            mMovieList = new ArrayList<Movie>();
         }
 
         GridView gridview = (GridView) findViewById(R.id.gridview);
@@ -45,12 +49,21 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        this.fetchMovies();
+
+        if (mMovieList.isEmpty()) {
+            this.fetchMovies();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putParcelable(KEY_MOVIES_LIST, Parcels.wrap(mMovieList));
+        super.onSaveInstanceState(outState);
     }
 
     private void fetchMovies() {
         for (int i = 0; i < mPosters.length; i++) {
-            mMovieList.add(mPosters[i]);
+            mMovieList.add(new Movie(mPosters[i]));
         }
     }
 

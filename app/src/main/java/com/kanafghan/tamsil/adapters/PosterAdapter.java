@@ -6,15 +6,16 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 
+import com.kanafghan.tamsil.models.Movie;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-public class PosterAdapter extends ArrayAdapter<String> {
+public class PosterAdapter extends ArrayAdapter<Movie> {
 
     private static final String BASE_URL = "http://image.tmdb.org/t/p/w185";
 
-    public PosterAdapter(Context c, ArrayList<String> mPosters) {
+    public PosterAdapter(Context c, ArrayList<Movie> mPosters) {
         super(c, 0, mPosters);
     }
 
@@ -33,8 +34,11 @@ public class PosterAdapter extends ArrayAdapter<String> {
             imageView = (ImageView) convertView;
         }
 
-        String posterUrl = getItem(position);
-        Picasso.with(getContext()).load(resolvePosterPath(posterUrl)).into(imageView);
+        Movie movie = getItem(position);
+        if (movie != null) {
+            String posterUrl = movie.getPoster();
+            Picasso.with(getContext()).load(resolvePosterPath(posterUrl)).into(imageView);
+        }
 
         return imageView;
     }
