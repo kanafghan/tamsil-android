@@ -1,8 +1,10 @@
 package com.kanafghan.tamsil;
 
+import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -11,8 +13,17 @@ import android.widget.Toast;
 import com.kanafghan.tamsil.adapters.PosterAdapter;
 import com.kanafghan.tamsil.models.Movie;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.parceler.Parcels;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
@@ -62,17 +73,121 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void fetchMovies() {
-        for (int i = 0; i < mPosters.length; i++) {
-            mMovieList.add(new Movie(mPosters[i]));
+        FetchMoviesTask task = new FetchMoviesTask();
+        task.execute();
+    }
+
+    public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
+
+        private final String LOG_TAG = FetchMoviesTask.class.getSimpleName();
+
+        @Override
+        protected Movie[] doInBackground(String... params) {
+            HttpURLConnection urlConnection = null;
+            BufferedReader reader = null;
+
+            String moviesJsonStr;
+
+            try {
+                // build the URL for requesting the list of movies
+                Uri.Builder urlBuilder = new Uri.Builder();
+                urlBuilder.scheme("https");
+                urlBuilder.authority("api.themoviedb.org");
+                urlBuilder.path("/3/discover/movie");
+                // TODO parameterize the "sort by"
+//                urlBuilder.appendQueryParameter("sort_by", "vote_average.desc");
+                urlBuilder.appendQueryParameter("sort_by", "popularity.desc");
+                urlBuilder.appendQueryParameter("api_key", BuildConfig.THE_MOVIE_DB_API_KEY);
+                Log.v(LOG_TAG, "URL: " + urlBuilder.toString());
+
+                URL url = new URL(urlBuilder.toString());
+
+                urlConnection = (HttpURLConnection) url.openConnection();
+                urlConnection.setRequestMethod("GET");
+                urlConnection.connect();
+
+                InputStream inputStream = urlConnection.getInputStream();
+                if (inputStream == null) {
+                    // Nothing to do.
+                    Log.v(LOG_TAG, "Did not get any input stream!");
+                    return null;
+                }
+
+                StringBuffer buffer = new StringBuffer();
+                reader = new BufferedReader(new InputStreamReader(inputStream));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    buffer.append(line + "\n");
+                }
+
+                if (buffer.length() == 0) {
+                    // Stream was empty. No point in parsing.
+                    Log.v(LOG_TAG, "Stream was empty!");
+                    return null;
+                }
+
+                moviesJsonStr = buffer.toString();
+
+                try {
+                    return this.getMoviesFromJson(moviesJsonStr);
+                } catch (JSONException e) {
+                    Log.e(LOG_TAG, "Error getting Movies From JSON: ", e);
+                }
+            } catch (IOException e) {
+                Log.e(LOG_TAG, "Error ", e);
+            } finally {
+                if (urlConnection != null) {
+                    urlConnection.disconnect();
+                }
+
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (final IOException e) {
+                        Log.e(LOG_TAG, "Error closing stream", e);
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Movie[] movies) {
+            if (movies != null) {
+                mMovieList.clear();
+                for (Movie m: movies) {
+                    mMovieList.add(m);
+                }
+                mPosterAdapter.notifyDataSetChanged();
+            } else {
+                Log.v(LOG_TAG, "Did not receive movies in onPostExecute()!");
+            }
+        }
+
+        private Movie[] getMoviesFromJson(String moviesJsonStr) throws JSONException {
+
+            final String MDB_MOVIES = "results";
+            final String MDB_MOVIE_id = "id";
+            final String MDB_MOVIE_POSTER = "poster_path";
+            final String MDB_MOVIE_TITLE = "original_title";
+            final String MDB_MOVIE_PLOT = "overview";
+            final String MDB_MOVIE_RATING = "vote_average";
+            final String MDB_MOVIE_RELEASE = "release_date";
+
+            JSONObject moviesJson = new JSONObject(moviesJsonStr);
+            JSONArray moviesArray = moviesJson.getJSONArray(MDB_MOVIES);
+
+            Movie[] result = new Movie[moviesArray.length()];
+            for (int i = 0; i < moviesArray.length(); i++) {
+                JSONObject movieJson = moviesArray.getJSONObject(i);
+
+                result[i] = new Movie(movieJson.getString(MDB_MOVIE_POSTER));
+                // TODO parse other properties
+            }
+
+            return result;
         }
     }
 
-    // references to our images
-    private String[] mPosters = {
-            "/tWqifoYuwLETmmasnGHO7xBjEtt.jpg", "/45Y1G5FEgttPAwjTYic6czC9xCn.jpg",
-            "/s9ye87pvq2IaDvjv9x4IOXVjvA7.jpg", "/5wBbdNb0NdGiZQJYoKHRv6VbiOr.jpg",
-            "/myRzRzCxdfUWjkJWgpHHZ1oGkJd.jpg", "/jjBgi2r5cRt36xF6iNUEhzscEcb.jpg",
-            "/gri0DDxsERr6B2sOR1fGLxLpSLx.jpg", "/67NXPYvK92oQgEQvLppF2Siol9q.jpg",
-            "/nBNZadXqJSdt05SHLqgT0HuC5Gm.jpg", "/rXMWOZiCt6eMX22jWuTOSdQ98bY.jpg"
-    };
 }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 
 import com.kanafghan.tamsil.models.Movie;
@@ -19,11 +20,7 @@ public class PosterAdapter extends ArrayAdapter<Movie> {
         super(c, 0, mPosters);
     }
 
-    public long getItemId(int position) {
-        return 0;
-    }
-
-    // create a new ImageView for each item referenced by the Adapter
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         ImageView imageView;
         if (convertView == null) {
@@ -38,6 +35,7 @@ public class PosterAdapter extends ArrayAdapter<Movie> {
         if (movie != null) {
             String posterUrl = movie.getPoster();
             Picasso.with(getContext()).load(resolvePosterPath(posterUrl)).into(imageView);
+            // TODO load also error and loading placeholder drawables (see Picasso docs)
         }
 
         return imageView;
