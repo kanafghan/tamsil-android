@@ -1,10 +1,15 @@
 package com.kanafghan.tamsil;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
@@ -72,9 +77,36 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        // handle Settings action
+        if (id == R.id.action_settings) {
+            Intent settingsIntent = new Intent(this, SettingsActivity.class);
+            startActivity(settingsIntent);
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
     private void fetchMovies() {
         FetchMoviesTask task = new FetchMoviesTask();
-        task.execute();
+
+        SharedPreferences settings = PreferenceManager.getDefaultSharedPreferences(getApplication());
+        String sortOrder = settings.getString(
+                getString(R.string.pref_sort_order_key),
+                getString(R.string.pref_most_popular));
+
+        task.execute(sortOrder);
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
@@ -94,9 +126,7 @@ public class MainActivity extends AppCompatActivity {
                 urlBuilder.scheme("https");
                 urlBuilder.authority("api.themoviedb.org");
                 urlBuilder.path("/3/discover/movie");
-                // TODO parameterize the "sort by"
-//                urlBuilder.appendQueryParameter("sort_by", "vote_average.desc");
-                urlBuilder.appendQueryParameter("sort_by", "popularity.desc");
+                urlBuilder.appendQueryParameter("sort_by", params[0]);
                 urlBuilder.appendQueryParameter("api_key", BuildConfig.THE_MOVIE_DB_API_KEY);
                 Log.v(LOG_TAG, "URL: " + urlBuilder.toString());
 
