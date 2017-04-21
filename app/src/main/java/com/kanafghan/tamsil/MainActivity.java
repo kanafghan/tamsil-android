@@ -58,6 +58,9 @@ public class MainActivity extends AppCompatActivity {
                                     int position, long id) {
                 Toast.makeText(MainActivity.this, "" + position,
                         Toast.LENGTH_SHORT).show();
+
+                Intent movieIntent = new Intent(getApplication(), MovieActivity.class);
+                startActivity(movieIntent);
             }
         });
     }
