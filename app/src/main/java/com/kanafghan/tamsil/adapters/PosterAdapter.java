@@ -41,7 +41,7 @@ public class PosterAdapter extends ArrayAdapter<Movie> {
         return imageView;
     }
 
-    private String resolvePosterPath(String relativePath) {
+    public static String resolvePosterPath(String relativePath) {
         return BASE_URL + relativePath;
     }
 }

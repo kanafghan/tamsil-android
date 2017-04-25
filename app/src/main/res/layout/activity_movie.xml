@@ -8,7 +8,6 @@
     android:orientation="vertical">
 
     <TextView android:id="@+id/movie_title"
-        android:text="The Amazing Spiderman 3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingTop="16dp"
@@ -33,30 +32,27 @@
             android:id="@+id/movie_poster"
             android:layout_width="wrap_content"
             android:layout_height="185dp"
-            android:src="@mipmap/ic_launcher"
-            android:layout_marginLeft="16dp" />
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginLeft="32dp"
             android:orientation="vertical"
             android:padding="8dp"
             android:background="#fff">
 
             <TextView
-                android:id="@+id/movie_release_date"
-                android:text="2017"
+                android:id="@+id/movie_rating"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="@color/colorPrimaryDark"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:layout_marginBottom="8dp"/>
+                android:layout_marginBottom="4dp"/>
 
             <TextView
-                android:id="@+id/movie_rating"
-                android:text="9.7/10"
+                android:id="@+id/movie_release_date"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textSize="14dp"
@@ -68,8 +64,7 @@
 
     <TextView
         android:id="@+id/movie_plot"
-        android:text="Som very long text, that spans over multiple lines. Lorem ipsum sin amit darsjuni."
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#fff"
         android:textColor="#000"

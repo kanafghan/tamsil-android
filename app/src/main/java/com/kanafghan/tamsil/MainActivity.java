@@ -13,7 +13,6 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.Toast;
 
 import com.kanafghan.tamsil.adapters.PosterAdapter;
 import com.kanafghan.tamsil.models.Movie;
@@ -34,6 +33,8 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     private static final String KEY_MOVIES_LIST = "movies";
+    public static final String KEY_MOVIE = "movie";
+
     private PosterAdapter mPosterAdapter;
     private ArrayList<Movie> mMovieList;
 
@@ -56,10 +57,10 @@ public class MainActivity extends AppCompatActivity {
         gridview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             public void onItemClick(AdapterView<?> parent, View v,
                                     int position, long id) {
-                Toast.makeText(MainActivity.this, "" + position,
-                        Toast.LENGTH_SHORT).show();
+                Movie mMovie = mMovieList.get(position);
 
                 Intent movieIntent = new Intent(getApplication(), MovieActivity.class);
+                movieIntent.putExtra(KEY_MOVIE, Parcels.wrap(mMovie));
                 startActivity(movieIntent);
             }
         });
@@ -215,8 +216,15 @@ public class MainActivity extends AppCompatActivity {
             for (int i = 0; i < moviesArray.length(); i++) {
                 JSONObject movieJson = moviesArray.getJSONObject(i);
 
-                result[i] = new Movie(movieJson.getString(MDB_MOVIE_POSTER));
-                // TODO parse other properties
+                Movie mMovie = new Movie(
+                        movieJson.getInt(MDB_MOVIE_id),
+                        movieJson.getString(MDB_MOVIE_TITLE),
+                        movieJson.getString(MDB_MOVIE_POSTER),
+                        movieJson.getString(MDB_MOVIE_RELEASE),
+                        movieJson.getDouble(MDB_MOVIE_RATING),
+                        movieJson.getString(MDB_MOVIE_PLOT)
+                );
+                result[i] = mMovie;
             }
 
             return result;
