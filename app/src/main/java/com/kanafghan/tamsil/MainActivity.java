@@ -1,7 +1,10 @@
 package com.kanafghan.tamsil;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -13,6 +16,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import com.kanafghan.tamsil.adapters.PosterAdapter;
 import com.kanafghan.tamsil.models.Movie;
@@ -111,6 +115,9 @@ public class MainActivity extends AppCompatActivity {
                 getString(R.string.pref_most_popular));
 
         task.execute(sortOrder);
+
+        String msg = "Loading movies...";
+        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
     }
 
     public class FetchMoviesTask extends AsyncTask<String, Void, Movie[]> {
@@ -132,7 +139,6 @@ public class MainActivity extends AppCompatActivity {
                 urlBuilder.path("/3/discover/movie");
                 urlBuilder.appendQueryParameter("sort_by", params[0]);
                 urlBuilder.appendQueryParameter("api_key", BuildConfig.THE_MOVIE_DB_API_KEY);
-                Log.v(LOG_TAG, "URL: " + urlBuilder.toString());
 
                 URL url = new URL(urlBuilder.toString());
 
@@ -196,6 +202,14 @@ public class MainActivity extends AppCompatActivity {
                 mPosterAdapter.notifyDataSetChanged();
             } else {
                 Log.v(LOG_TAG, "Did not receive movies in onPostExecute()!");
+
+                if (!isOnline()) {
+                    String msg = "You have no Internet connection!";
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                } else {
+                    String msg = "Failed to fetch any movie due to an unexpected error!";
+                    Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_LONG).show();
+                }
             }
         }
 
@@ -228,6 +242,13 @@ public class MainActivity extends AppCompatActivity {
             }
 
             return result;
+        }
+
+        public boolean isOnline() {
+            ConnectivityManager cm =
+                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo netInfo = cm.getActiveNetworkInfo();
+            return netInfo != null && netInfo.isConnectedOrConnecting();
         }
     }
 
