@@ -7,6 +7,7 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.kanafghan.tamsil.R;
 import com.kanafghan.tamsil.models.Movie;
 import com.squareup.picasso.Picasso;
 
@@ -34,8 +35,11 @@ public class PosterAdapter extends ArrayAdapter<Movie> {
         Movie movie = getItem(position);
         if (movie != null) {
             String posterUrl = movie.getPoster();
-            Picasso.with(getContext()).load(resolvePosterPath(posterUrl)).into(imageView);
-            // TODO load also error and loading placeholder drawables (see Picasso docs)
+            Picasso.with(getContext())
+                    .load(resolvePosterPath(posterUrl))
+                    .placeholder(R.drawable.movie_poster_placeholder)
+                    .error(R.drawable.movie_poster_placeholder)
+                    .into(imageView);
         }
 
         return imageView;

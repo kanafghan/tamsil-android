@@ -43,7 +43,11 @@ public class MovieActivity extends AppCompatActivity {
             if (posterView != null) {
                 posterView.setAdjustViewBounds(true);
                 String posterUrl = resolvePosterPath(mMovie.getPoster());
-                Picasso.with(this).load(posterUrl).into(posterView);
+                Picasso.with(this)
+                        .load(posterUrl)
+                        .placeholder(R.drawable.movie_poster_placeholder)
+                        .error(R.drawable.movie_poster_placeholder)
+                        .into(posterView);
             }
 
             TextView releaseDateView = (TextView) findViewById(R.id.movie_release_date);
